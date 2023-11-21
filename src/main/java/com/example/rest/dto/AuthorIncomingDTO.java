@@ -1,7 +1,5 @@
 package com.example.rest.dto;
 
-import java.util.List;
-
 public class AuthorIncomingDTO {
 
     private int id;

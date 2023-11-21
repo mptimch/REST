@@ -1,9 +1,7 @@
 package com.example.rest.servlet;
 
-import com.example.rest.dto.BookIncomingDTO;
 import com.example.rest.dto.GenreIncomingDTO;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
-import com.example.rest.service.BookService;
 import com.example.rest.service.Genreservice;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,17 +9,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "genreServlet", value = "/genre")
-public class GenreServlet extends HttpServlet  implements DefaultServlet{
+public class GenreServlet extends HttpServlet implements DefaultServlet {
 
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String stringId = request.getParameter("id");
-        Genreservice genreservice = new Genreservice(new GenreRepositoryImpl());
+        Genreservice genreservice = createGenreService();
         String genreJson = null;
         try {
             if (stringId != null) {
@@ -40,7 +37,7 @@ public class GenreServlet extends HttpServlet  implements DefaultServlet{
 
     public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String stringId = request.getParameter("id");
-        Genreservice genreservice = new Genreservice(new GenreRepositoryImpl());
+        Genreservice genreservice = createGenreService();
         boolean isDeleted = false;
         try {
             if (stringId != null) {
@@ -68,7 +65,7 @@ public class GenreServlet extends HttpServlet  implements DefaultServlet{
 
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Genreservice service = new Genreservice(new GenreRepositoryImpl());
+        Genreservice service = createGenreService();
         String action = request.getParameter("action");
         GenreIncomingDTO dto = null;
         boolean hasRelations = request.getParameter("booksId").isEmpty();
@@ -91,10 +88,9 @@ public class GenreServlet extends HttpServlet  implements DefaultServlet{
                 response.getWriter().flush();
             }
         } catch (Exception e) {
-            sendErrorResponse(response, e.getMessage());
+            sendErrorResponse(response, "Введены неверные данные " + e.getMessage());
         }
     }
-
 
 
     private GenreIncomingDTO createDtoWithoutRelations(HttpServletRequest request) {
@@ -115,6 +111,11 @@ public class GenreServlet extends HttpServlet  implements DefaultServlet{
         }
         dto.setBooksId(booksId);
         return dto;
+    }
+
+    protected Genreservice createGenreService() {
+        Genreservice genreservice = new Genreservice(new GenreRepositoryImpl());
+        return genreservice;
     }
 
 }

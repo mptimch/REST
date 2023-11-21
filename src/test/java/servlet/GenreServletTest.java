@@ -1,9 +1,8 @@
 package servlet;
 
-import com.example.rest.dto.AuthorIncomingDTO;
 import com.example.rest.exceptions.NoSuchEntityException;
-import com.example.rest.service.AuthorService;
-import com.example.rest.servlet.AuthorServlet;
+import com.example.rest.service.Genreservice;
+import com.example.rest.servlet.GenreServlet;
 import comon.TestSetup;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,37 +18,35 @@ import java.sql.SQLException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class AuthorServletTest extends TestSetup {
-
+class GenreServletTest extends TestSetup {
 
     @Mock
-    private AuthorService authorService = mock(AuthorService.class);
-
-
-    AuthorServlet servlet = new AuthorServlet() {
-        @Override
-        public AuthorService createAuthorService() {
-            return authorService;
-        }
-    };
+    private Genreservice genreservice = mock(Genreservice.class);
 
     HttpServletRequest request;
     HttpServletResponse response;
     PrintWriter writer;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         getServletsAndWriter();
     }
 
 
+    GenreServlet servlet = new GenreServlet() {
+        @Override
+        protected Genreservice createGenreService() {
+            return genreservice;
+        }
+    };
+
+
     @Test
     void doGetTest() throws IOException, NoSuchEntityException, SQLException {
-
         when(response.getWriter()).thenReturn(writer);
-        String stringDTO = "{\"name\":\"Лев Толстой\",\"books\":[\"Война и мир\",\"Анна Каренина\"]}";
-        when(request.getParameter("id")).thenReturn("10");
-        when(authorService.findById(10)).thenReturn(stringDTO);
+        String stringDTO = "{\"name\":\"Роман\",\"books\":[\"Война и мир\",\"Темная башня\"]}";
+        when(request.getParameter("id")).thenReturn("3");
+        when(genreservice.findById(3)).thenReturn(stringDTO);
 
         servlet.doGet(request, response);
 
@@ -65,11 +62,11 @@ class AuthorServletTest extends TestSetup {
 
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("id")).thenReturn("5");
-        when(authorService.delete(5)).thenReturn(true);
+        when(genreservice.delete(5)).thenReturn(true);
 
         servlet.doDelete(request, response);
 
-        Mockito.verify(writer).println("Автор успешно удален");
+        Mockito.verify(writer).println("Жанр успешно удален");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
         Mockito.verify(writer).flush();
     }
@@ -82,37 +79,36 @@ class AuthorServletTest extends TestSetup {
 
         servlet.doDelete(request, response);
 
-        Mockito.verify(writer).println("Укажите Id автора, которого хотите удалить");
+        Mockito.verify(writer).println("Укажите Id жанра, который хотите удалить");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         Mockito.verify(writer).flush();
     }
 
     @Test
     void doAddTestException() throws IOException, SQLException, NoSuchEntityException {
-
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("add");
-        when(request.getParameter("id")).thenReturn("Максим Горький");
+        when(request.getParameter("id")).thenReturn("Научная фантастика");
         when(request.getParameter("name")).thenReturn("14");
+        when(request.getParameter("booksId")).thenReturn("");
 
         servlet.doPost(request, response);
 
-        Mockito.verify(writer).println("Введены неверные данные For input string: \"Максим Горький\"");
+        Mockito.verify(writer).println("Введены неверные данные For input string: \"Научная фантастика\"");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         Mockito.verify(writer).flush();
     }
 
     @Test
-    void doAddTest() throws IOException, SQLException, NoSuchEntityException {
+    void doAddTestFullEntity() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("add");
         when(request.getParameter("id")).thenReturn("14");
-        when(request.getParameter("name")).thenReturn("Максим Горький");
-        AuthorIncomingDTO dto = new AuthorIncomingDTO();
-        dto.setName("Максим Горький");
-        dto.setId(14);
+        when(request.getParameter("name")).thenReturn("Научная фантастика");
+        when(request.getParameter("booksId")).thenReturn("5");
+        when(request.getParameterValues("booksId")).thenReturn(new String[]{"1", "2"});
 
-        when(authorService.add(Mockito.any())).thenReturn(true);
+        when(genreservice.add(Mockito.any())).thenReturn(true);
 
         servlet.doPost(request, response);
 
@@ -122,39 +118,38 @@ class AuthorServletTest extends TestSetup {
     }
 
     @Test
-    void doUpdateTestException() throws IOException, SQLException, NoSuchEntityException {
+    void doUpdateTestShortEntity() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("update");
         when(request.getParameter("id")).thenReturn("14");
-        when(request.getParameter("name")).thenReturn("Максим Горький");
+        when(request.getParameter("name")).thenReturn("Научная фантастика");
+        when(request.getParameter("booksId")).thenReturn("");
 
-        when(authorService.update(Mockito.any())).thenThrow(new NoSuchEntityException(14, "Пользователь с id" + 14 + " не найден"));
-
+        when(genreservice.update(Mockito.any())).thenReturn(true);
 
         servlet.doPost(request, response);
 
-        Mockito.verify(writer).println("Введены неверные данные Пользователь с id14 не найден");
+        Mockito.verify(writer).println("Операция прошла успешно");
+        Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
+        Mockito.verify(writer).flush();
+    }
+
+
+    @Test
+    void doAUpdatetTestException() throws IOException, SQLException, NoSuchEntityException {
+        when(response.getWriter()).thenReturn(writer);
+        when(request.getParameter("action")).thenReturn("update");
+        when(request.getParameter("id")).thenReturn("14");
+        when(request.getParameter("name")).thenReturn("Научная фантастика");
+        when(request.getParameter("price")).thenReturn("1400");
+        when(request.getParameter("booksId")).thenReturn("");
+
+        when(genreservice.update(Mockito.any())).thenThrow(new NoSuchEntityException(14, "Жанр с id " + 14 + " не найден"));
+
+        servlet.doPost(request, response);
+
+        Mockito.verify(writer).println("Введены неверные данные Жанр с id 14 не найден");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        Mockito.verify(writer).flush();
-    }
-
-
-    @Test
-    void doAUpdatetTest() throws IOException, SQLException, NoSuchEntityException {
-        when(response.getWriter()).thenReturn(writer);
-        when(request.getParameter("action")).thenReturn("update");
-        when(request.getParameter("id")).thenReturn("14");
-        when(request.getParameter("name")).thenReturn("Максим Горький");
-        AuthorIncomingDTO dto = new AuthorIncomingDTO();
-        dto.setName("Максим Горький");
-        dto.setId(14);
-
-        when(authorService.update(Mockito.any())).thenReturn(true);
-
-        servlet.doPost(request, response);
-
-        Mockito.verify(writer).println("Операция прошла успешно");
-        Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
         Mockito.verify(writer).flush();
     }
 

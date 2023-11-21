@@ -2,22 +2,17 @@ package com.example.rest.service;
 
 import com.example.rest.dto.AuthorIncomingDTO;
 import com.example.rest.dto.AuthorToResponseDTO;
-import com.example.rest.dto.BookToResponseDTO;
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Author;
 import com.example.rest.model.Book;
-import com.example.rest.model.Genre;
-import com.example.rest.repository.AuthorRepository;
-import com.example.rest.repository.BookRepository;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
-import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.google.gson.Gson;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AuthorService implements SimpleService <AuthorIncomingDTO>{
+public class AuthorService implements SimpleService<AuthorIncomingDTO> {
     AuthorRepositoryImpl authorRepository;
 
     public AuthorService(AuthorRepositoryImpl authorRepository) {
@@ -30,7 +25,7 @@ public class AuthorService implements SimpleService <AuthorIncomingDTO>{
         Author author = authorRepository.findById(id);
         AuthorToResponseDTO dto = new AuthorToResponseDTO();
         dto.setName(author.getName());
-        List <Book> books = author.getBooks();
+        List<Book> books = author.getBooks();
         List<String> booksNames = books.stream()
                 .map(Book::getName)
                 .collect(Collectors.toList());

@@ -5,16 +5,14 @@ import com.example.rest.dto.BookToResponseDTO;
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
-import com.example.rest.repository.BookRepository;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BookService implements  SimpleService <BookIncomingDTO>{
+public class BookService implements SimpleService<BookIncomingDTO> {
     BookRepositoryImpl bookRepository;
 
     public BookService(BookRepositoryImpl bookRepository) {
@@ -69,11 +67,11 @@ public class BookService implements  SimpleService <BookIncomingDTO>{
         return result;
     }
 
-    void fillBookToResponseDTO (BookToResponseDTO dto, Book book) {
+    void fillBookToResponseDTO(BookToResponseDTO dto, Book book) {
         dto.setName(book.getName());
         dto.setPrice(book.getPrice());
         dto.setAuthor(book.getAuthor().getName());
-        List <Genre> genres = book.getGenres();
+        List<Genre> genres = book.getGenres();
         List<String> genreNames = genres.stream()
                 .map(Genre::getName)
                 .collect(Collectors.toList());

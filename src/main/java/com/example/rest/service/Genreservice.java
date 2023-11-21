@@ -5,7 +5,6 @@ import com.example.rest.dto.GenreToResponseDTO;
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
-import com.example.rest.repository.GenreRepository;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import com.google.gson.Gson;
 

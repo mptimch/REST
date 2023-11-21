@@ -1,8 +1,5 @@
 package com.example.rest.dto;
 
-import com.example.rest.model.Author;
-import com.example.rest.model.Genre;
-
 import java.util.List;
 
 public class BookToResponseDTO {

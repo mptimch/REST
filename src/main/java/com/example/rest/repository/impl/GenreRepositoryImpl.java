@@ -1,11 +1,8 @@
 package com.example.rest.repository.impl;
 
 import com.example.rest.exceptions.NoSuchEntityException;
-import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
-import com.example.rest.repository.BookRepository;
 import com.example.rest.repository.GenreRepository;
-import com.example.rest.repository.mapper.BookResultSetMapperImpl;
 import com.example.rest.repository.mapper.GenreResultSetMapperImpl;
 import db.impl.ConnectionManagerImpl;
 
@@ -14,10 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GenreRepositoryImpl implements GenreRepository {
-
-    private GenreResultSetMapperImpl resultSetMapper = new GenreResultSetMapperImpl();
     private ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-    private BookRepository bookRepository;
+    private GenreResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.genreResultSetMapper;
 
     private Connection connection;
     private Statement statement;
@@ -30,14 +25,14 @@ public class GenreRepositoryImpl implements GenreRepository {
         try {
             connection = connectionManager.getConnection();
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM 'genre' WHERE 'id' = " + id + ";");
+            resultSet = statement.executeQuery("SELECT * FROM genre WHERE id = " + id + ";");
 
-            // проверяем, получили ли мы то-то из базы
             if (!resultSet.next()) {
                 String message = "Жанр с id " + id + " не найден";
                 throw new NoSuchEntityException(id, message);
             }
 
+            resultSetMapper = RepositoryMapperStorage.getGenreResultSetMapper();
             genre = resultSetMapper.map(resultSet);
 
         } catch (SQLException e) {
@@ -54,7 +49,7 @@ public class GenreRepositoryImpl implements GenreRepository {
         try {
             connection = connectionManager.getConnection();
             statement = connection.createStatement();
-            succsess = statement.execute("DELETE FROM 'genre' WHERE 'id' = " + id + ";");
+            succsess = statement.execute("DELETE FROM genre WHERE id = " + id + ";");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -69,7 +64,7 @@ public class GenreRepositoryImpl implements GenreRepository {
         try {
             connection = connectionManager.getConnection();
             String name = genre.getName();
-            String sql = "INSERT INTO 'genre' (name) VALUES (?)";
+            String sql = "INSERT INTO genre (name) VALUES (?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, name);
             int count = preparedStatement.executeUpdate();
@@ -80,8 +75,6 @@ public class GenreRepositoryImpl implements GenreRepository {
             result = true;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return result;
     }
@@ -116,8 +109,6 @@ public class GenreRepositoryImpl implements GenreRepository {
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return result;
     }
@@ -135,10 +126,13 @@ public class GenreRepositoryImpl implements GenreRepository {
             int rowsUpdated = statement.executeUpdate();
             success = rowsUpdated > 0;
 
+            if (!success) {
+                String message = "Жанров с id " + genre.getId() + " не найдено";
+                throw new NoSuchEntityException(genre.getId(), message);
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return success;
     }
@@ -193,9 +187,8 @@ public class GenreRepositoryImpl implements GenreRepository {
 
 
             while (resultSet.next()) {
-                Genre genre = new Genre();
-                genre.setId(resultSet.getInt("id"));
-                genre.setName(resultSet.getString("name"));
+                resultSetMapper = RepositoryMapperStorage.getGenreResultSetMapper();
+                Genre genre = resultSetMapper.getGenresByBookId(resultSet);
                 genres.add(genre);
             }
 

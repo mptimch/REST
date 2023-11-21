@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Main {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
 
         ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
         try {
@@ -27,7 +27,7 @@ public class Main {
     }
 
 
-    private static void executeScript(String filename, Statement statement) throws IOException, SQLException {
+    public static void executeScript(String filename, Statement statement) throws IOException, SQLException {
         InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(filename);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 

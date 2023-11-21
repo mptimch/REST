@@ -30,7 +30,6 @@ public class GenreServiceTest extends TestSetup {
     private Genreservice genreservice = new Genreservice(genreRepository);
 
 
-
     @Test
     void findByIdNormalTest() throws SQLException, NoSuchEntityException {
         Mockito.when(genreRepository.findById(3)).thenReturn(genre2);
@@ -59,7 +58,7 @@ public class GenreServiceTest extends TestSetup {
     }
 
     @Test
-    void addTestNormal () throws SQLException {
+    void addTestNormal() throws SQLException {
         GenreIncomingDTO dto = createDTO(genre1);
         dto.setBooksId(null);
         Mockito.when(genreRepository.add(Mockito.any())).thenReturn(true);
@@ -69,7 +68,7 @@ public class GenreServiceTest extends TestSetup {
 
 
     @Test
-    void addTestException () throws SQLException {
+    void addTestException() throws SQLException {
         GenreIncomingDTO dto = createDTO(genre2);
         dto.setBooksId(null);
         Mockito.when(genreRepository.add(Mockito.any())).thenThrow(IllegalArgumentException.class);
@@ -77,9 +76,8 @@ public class GenreServiceTest extends TestSetup {
     }
 
 
-
     @Test
-    void updateTestNormal () throws SQLException, NoSuchEntityException {
+    void updateTestNormal() throws SQLException, NoSuchEntityException {
         GenreIncomingDTO dto = createDTO(genre3);
         Mockito.when(genreRepository.update(Mockito.any(Genre.class),
                 Mockito.anyList())).thenReturn(true);
@@ -89,7 +87,7 @@ public class GenreServiceTest extends TestSetup {
 
 
     @Test
-    void updateTestException () throws SQLException, NoSuchEntityException {
+    void updateTestException() throws SQLException, NoSuchEntityException {
         GenreIncomingDTO dto = createDTO(genre3);
         Mockito.when(genreRepository.update(Mockito.any(Genre.class),
                 Mockito.anyList())).thenThrow(NoSuchEntityException.class);
@@ -97,12 +95,12 @@ public class GenreServiceTest extends TestSetup {
         assertThrows(NoSuchEntityException.class, () -> genreservice.update(dto));
     }
 
-    private GenreIncomingDTO createDTO (Genre genre) {
+    private GenreIncomingDTO createDTO(Genre genre) {
         GenreIncomingDTO dto = new GenreIncomingDTO();
         dto.setId(genre.getId());
         dto.setName(genre.getName());
         List<Book> books = genre.getBooks();
-        List <Integer> booksId = books.stream().map(Book::getId).collect(Collectors.toList());
+        List<Integer> booksId = books.stream().map(Book::getId).collect(Collectors.toList());
         dto.setBooksId(booksId);
         return dto;
     }

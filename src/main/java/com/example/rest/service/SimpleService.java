@@ -1,7 +1,6 @@
 package com.example.rest.service;
 
 import com.example.rest.exceptions.NoSuchEntityException;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.sql.SQLException;
 

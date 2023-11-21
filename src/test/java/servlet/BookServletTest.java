@@ -1,15 +1,12 @@
 package servlet;
 
-import com.example.rest.dto.AuthorIncomingDTO;
-import com.example.rest.dto.BookIncomingDTO;
 import com.example.rest.exceptions.NoSuchEntityException;
-import com.example.rest.service.AuthorService;
 import com.example.rest.service.BookService;
-import com.example.rest.servlet.AuthorServlet;
 import com.example.rest.servlet.BookServlet;
 import comon.TestSetup;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,15 +14,23 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class BookServletTest extends TestSetup {
+class BookServletTest extends TestSetup {
 
     @Mock
     private BookService bookService = mock(BookService.class);
+
+    HttpServletRequest request;
+    HttpServletResponse response;
+    PrintWriter writer;
+
+    @BeforeEach
+    void setUp() {
+        getServletsAndWriter();
+    }
 
 
     BookServlet servlet = new BookServlet() {
@@ -37,7 +42,7 @@ public class BookServletTest extends TestSetup {
 
 
     @Test
-    public void doGetTest() throws IOException, NoSuchEntityException, SQLException {
+    void doGetTest() throws IOException, NoSuchEntityException, SQLException {
         when(response.getWriter()).thenReturn(writer);
         String stringDTO = "{\"name\":\"Война и мир\"," +
                 "\"price\":1867," +
@@ -56,7 +61,7 @@ public class BookServletTest extends TestSetup {
     }
 
     @Test
-    public void doDeleteTest() throws IOException, SQLException, NoSuchEntityException {
+    void doDeleteTest() throws IOException, SQLException, NoSuchEntityException {
 
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("id")).thenReturn("5");
@@ -71,7 +76,7 @@ public class BookServletTest extends TestSetup {
     }
 
     @Test
-    public void doDeleteTestWrong() throws IOException, SQLException, NoSuchEntityException {
+    void doDeleteTestWrong() throws IOException, SQLException, NoSuchEntityException {
 
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("id")).thenReturn(null);
@@ -84,23 +89,23 @@ public class BookServletTest extends TestSetup {
     }
 
     @Test
-    public void doAddTestException() throws IOException, SQLException, NoSuchEntityException {
+    void doAddTestException() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("add");
         when(request.getParameter("id")).thenReturn("Игра престолов");
         when(request.getParameter("name")).thenReturn("14");
-        when(request.getParameter("author")).thenReturn("");
+        when(request.getParameter("author_id")).thenReturn("");
 
 
         servlet.doPost(request, response);
 
-        Mockito.verify(writer).println("Введены неверные данные For input string: \"Максим Горький\"");
+        Mockito.verify(writer).println("Введены неверные данные For input string: \"Игра престолов\"");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         Mockito.verify(writer).flush();
     }
 
     @Test
-    public void doAddTestFullEntity() throws IOException, SQLException, NoSuchEntityException {
+    void doAddTestFullEntity() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("add");
         when(request.getParameter("id")).thenReturn("14");
@@ -119,15 +124,13 @@ public class BookServletTest extends TestSetup {
     }
 
     @Test
-    public void doUpdateTestShortEntity() throws IOException, SQLException, NoSuchEntityException {
+    void doUpdateTestShortEntity() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("update");
         when(request.getParameter("id")).thenReturn("14");
         when(request.getParameter("name")).thenReturn("Игра престолов");
         when(request.getParameter("price")).thenReturn("1400");
         when(request.getParameter("author_id")).thenReturn("");
-
-
 
         when(bookService.update(Mockito.any())).thenReturn(true);
 
@@ -140,7 +143,7 @@ public class BookServletTest extends TestSetup {
 
 
     @Test
-    public void doAUpdatetTestException() throws IOException, SQLException, NoSuchEntityException {
+    void doAUpdatetTestException() throws IOException, SQLException, NoSuchEntityException {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter("action")).thenReturn("update");
         when(request.getParameter("id")).thenReturn("14");
@@ -155,6 +158,12 @@ public class BookServletTest extends TestSetup {
         Mockito.verify(writer).println("Введены неверные данные Книга с id14 не найдена");
         Mockito.verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         Mockito.verify(writer).flush();
+    }
+
+    private void getServletsAndWriter() {
+        request = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
+        writer = mock(PrintWriter.class);
     }
 }
 

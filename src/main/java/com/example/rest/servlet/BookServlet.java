@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.example.rest.dto.BookIncomingDTO;
 import com.example.rest.repository.impl.BookRepositoryImpl;
-import com.example.rest.service.AuthorService;
 import com.example.rest.service.BookService;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -94,7 +93,6 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
     }
 
 
-
     private BookIncomingDTO createDtoWithoutRelations(HttpServletRequest request) {
         BookIncomingDTO dto = new BookIncomingDTO();
         dto.setId(Integer.parseInt(request.getParameter("id")));
@@ -108,7 +106,7 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
         dto.setAuthorId(Integer.parseInt(request.getParameter("author_id")));
 
         String[] genreIds = request.getParameterValues("genresId");
-        List <Integer> genresId = new ArrayList<>();
+        List<Integer> genresId = new ArrayList<>();
         for (String genre : genreIds) {
             int id = Integer.parseInt(genre);
             genresId.add(id);
