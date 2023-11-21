@@ -3,11 +3,41 @@ package com.example.rest.repository.impl;
 import com.example.rest.repository.mapper.AuthorResultSetMapperImpl;
 import com.example.rest.repository.mapper.BookResultSetMapperImpl;
 import com.example.rest.repository.mapper.GenreResultSetMapperImpl;
+import com.mysql.cj.jdbc.ConnectionImpl;
+import db.impl.ConnectionManagerImpl;
+
+import java.sql.SQLException;
 
 public class RepositoryMapperStorage {
-    static AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl();
-    static BookRepositoryImpl bookRepository = new BookRepositoryImpl();
-    static GenreRepositoryImpl genreRepository = new GenreRepositoryImpl();
+    static AuthorRepositoryImpl authorRepository;
+
+    static {
+        try {
+            authorRepository = new AuthorRepositoryImpl(new ConnectionManagerImpl().getConnection());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static BookRepositoryImpl bookRepository;
+
+    static {
+        try {
+            bookRepository = new BookRepositoryImpl(new ConnectionManagerImpl().getConnection());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static GenreRepositoryImpl genreRepository;
+
+    static {
+        try {
+            genreRepository = new GenreRepositoryImpl(new ConnectionManagerImpl().getConnection());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     static AuthorResultSetMapperImpl authorResultSetMapper = new AuthorResultSetMapperImpl();
     static BookResultSetMapperImpl bookResultSetMapper = new BookResultSetMapperImpl();

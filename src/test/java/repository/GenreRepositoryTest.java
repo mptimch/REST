@@ -3,10 +3,8 @@ package repository;
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
-import com.example.rest.repository.impl.RepositoryMapperStorage;
-import comon.TestSetup;
+import comon.MySQLTestContainer;
 import db.impl.ConnectionManagerImpl;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -16,15 +14,11 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GenreRepositoryTest extends TestSetup {
+public class GenreRepositoryTest extends MySQLTestContainer {
 
-    GenreRepositoryImpl genreRepository = RepositoryMapperStorage.getGenreRepository();
+    GenreRepositoryImpl genreRepository = new GenreRepositoryImpl(MySQLTestContainer.getConnection());
 
-
-    @BeforeAll
-    static void setup() {
-        TestbaseSetup testbaseSetup = new TestbaseSetup();
-        testbaseSetup.createBases();
+    public GenreRepositoryTest() throws SQLException {
     }
 
 
@@ -64,7 +58,6 @@ public class GenreRepositoryTest extends TestSetup {
 
     @Test
     void deleteByIdTest() throws NoSuchEntityException {
-        Genre genre = genreRepository.findById(1);
         genreRepository.deleteById(1);
         assertThrows(NoSuchEntityException.class, () -> genreRepository.findById(1));
     }

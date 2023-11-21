@@ -2,8 +2,10 @@ package repository;
 
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
+import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.example.rest.repository.impl.RepositoryMapperStorage;
+import comon.MySQLTestContainer;
 import comon.TestSetup;
 import db.impl.ConnectionManagerImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,17 +18,12 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BookRepositoryTest extends TestSetup {
+public class BookRepositoryTest extends MySQLTestContainer {
 
-    BookRepositoryImpl bookRepository = RepositoryMapperStorage.getBookRepository();
+BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.getConnection());
 
-
-    @BeforeAll
-    static void setup() {
-        TestbaseSetup testbaseSetup = new TestbaseSetup();
-        testbaseSetup.createBases();
+    public BookRepositoryTest() throws SQLException {
     }
-
 
     @Test
     void addTest() throws IllegalArgumentException, SQLException {
@@ -82,9 +79,7 @@ public class BookRepositoryTest extends TestSetup {
         book.setName("Новое название");
         book.setPrice(850);
         bookRepository.update(book);
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-        Connection connection = connectionManager.getConnection();
-        Statement statement = connection.createStatement();
+        Statement statement = MySQLTestContainer.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT name FROM book WHERE 'id' = 2;");
         String genreName = "";
 
@@ -93,5 +88,7 @@ public class BookRepositoryTest extends TestSetup {
             assertEquals(genreName, book1.getName());
 
         }
+        resultSet.close();
+        statement.close();
     }
 }

@@ -5,7 +5,6 @@ import com.example.rest.model.Author;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.repository.impl.RepositoryMapperStorage;
 import comon.MySQLTestContainer;
-import comon.TestSetup;
 import db.impl.ConnectionManagerImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuthorRepositoryTest extends MySQLTestContainer {
 
-    AuthorRepositoryImpl authorRepository = RepositoryMapperStorage.getAuthorRepository();
+    //    AuthorRepositoryImpl authorRepository = RepositoryMapperStorage.getAuthorRepository();
+    AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl(MySQLTestContainer.getConnection());
+
+    AuthorRepositoryTest() throws SQLException {
+    }
 
 
     @BeforeAll
@@ -33,8 +36,7 @@ class AuthorRepositoryTest extends MySQLTestContainer {
     void addTest() throws IllegalArgumentException, SQLException {
         authorRepository.add(author1);
         int id = 0;
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-        Connection connection = connectionManager.getConnection();
+        Connection connection = MySQLTestContainer.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT MAX(id) AS max_id FROM author;");
 

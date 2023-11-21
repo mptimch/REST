@@ -3,12 +3,14 @@ package com.example.rest.servlet;
 import com.example.rest.dto.GenreIncomingDTO;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import com.example.rest.service.Genreservice;
+import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +116,12 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
     }
 
     protected Genreservice createGenreService() {
-        Genreservice genreservice = new Genreservice(new GenreRepositoryImpl());
+        Genreservice genreservice = null;
+        try {
+            genreservice = new Genreservice(new GenreRepositoryImpl(new ConnectionManagerImpl().getConnection()));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return genreservice;
     }
 

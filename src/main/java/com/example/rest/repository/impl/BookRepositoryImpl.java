@@ -4,7 +4,6 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.repository.BookRepository;
 import com.example.rest.repository.mapper.BookResultSetMapperImpl;
-import db.impl.ConnectionManagerImpl;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,20 +11,18 @@ import java.util.List;
 
 public class BookRepositoryImpl implements BookRepository {
     private BookResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.getBookResultSetMapper();
-    private ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
 
     private Connection connection;
-    private Statement statement;
-    private ResultSet resultSet;
 
+    public BookRepositoryImpl(Connection connection) {
+        this.connection = connection;
+    }
 
     @Override
     public Book findById(Integer id) throws NoSuchEntityException {
         Book book = new Book();
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM book WHERE id = " + id + ";");
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM book WHERE id = " + id + ";")) {
 
             if (!resultSet.isBeforeFirst()) {
                 String message = "Книга с id " + id + " не найдена";
@@ -37,8 +34,6 @@ public class BookRepositoryImpl implements BookRepository {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return book;
     }
@@ -47,14 +42,10 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public boolean deleteById(Integer id) {
         boolean succsess = false;
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             succsess = statement.execute("DELETE FROM book WHERE id = " + id + ";");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return succsess;
     }
@@ -62,10 +53,8 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public boolean add(Book book) throws IllegalArgumentException {
         boolean result = false;
-        try {
-            connection = connectionManager.getConnection();
-            String sql = "INSERT INTO book (name, price) VALUES (?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO book (name, price) VALUES (?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, book.getName());
             preparedStatement.setInt(2, book.getPrice());
             int count = preparedStatement.executeUpdate();
@@ -83,12 +72,11 @@ public class BookRepositoryImpl implements BookRepository {
 
     public boolean add(Book book, int authorId, List<Integer> genresId) throws IllegalArgumentException {
         boolean result = false;
-        try {
+        String name = book.getName();
+        String sqlToBook = "INSERT INTO book (name, price, author_id) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlToBook, Statement.RETURN_GENERATED_KEYS)) {
             int bookId = 0;
-            connection = connectionManager.getConnection();
-            String name = book.getName();
-            String sqlToBook = "INSERT INTO book (name, price, author_id) VALUES (?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlToBook, Statement.RETURN_GENERATED_KEYS);
+
             preparedStatement.setString(1, name);
             preparedStatement.setInt(2, book.getPrice());
             preparedStatement.setInt(3, authorId);
@@ -113,6 +101,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             insertBookGenreStatement.executeBatch();
+            insertBookGenreStatement.close();
             result = true;
 
         } catch (SQLException e) {
@@ -125,13 +114,10 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public boolean update(Book book) throws NoSuchEntityException {
         boolean success = false;
-        try {
-            // Проверяем, есть ли книга с таким id. Если ее нет - ловим исключение
+        String sql = "UPDATE book SET name = ?, price = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             findById(book.getId());
 
-            connection = connectionManager.getConnection();
-            String sql = "UPDATE book SET name = ?, price = ? WHERE id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, book.getName());
             statement.setInt(2, book.getPrice());
             statement.setInt(3, book.getId());
@@ -152,10 +138,9 @@ public class BookRepositoryImpl implements BookRepository {
         String deleteBookGenreQuery = "DELETE FROM book_genre WHERE book_id = ?";
         String insertBookGenreQuery = "INSERT INTO book_genre (book_id, genre_id) VALUES (?, ?)";
 
-        try (Connection resourceConnection = connectionManager.getConnection();
-             PreparedStatement updateBookStatement = resourceConnection.prepareStatement(updateBookQuery);
-             PreparedStatement deleteBookGenreStatement = resourceConnection.prepareStatement(deleteBookGenreQuery);
-             PreparedStatement insertBookGenreStatement = resourceConnection.prepareStatement(insertBookGenreQuery)) {
+        try (PreparedStatement updateBookStatement = connection.prepareStatement(updateBookQuery);
+             PreparedStatement deleteBookGenreStatement = connection.prepareStatement(deleteBookGenreQuery);
+             PreparedStatement insertBookGenreStatement = connection.prepareStatement(insertBookGenreQuery)) {
 
             updateBookStatement.setInt(1, authorId);
             updateBookStatement.setInt(2, book.getId());
@@ -182,11 +167,9 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public List<Book> getBooksByAuthorId(int id) {
         List<Book> books = new ArrayList<>();
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
-            String sql = "SELECT * FROM book WHERE author_id = " + id + ";";
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT * FROM book WHERE author_id = " + id + ";";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
 
             if (!resultSet.isBeforeFirst()) {
                 String message = "Книга по id автора " + id + " не найдена";
@@ -201,8 +184,6 @@ public class BookRepositoryImpl implements BookRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return books;
     }
@@ -210,14 +191,13 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public List<Book> getBooksByGenreId(int id) {
         List<Book> books = new ArrayList<>();
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
-            String sql = "SELECT b.id, b.name, b.price, b.author_id " +
-                    "FROM book b " +
-                    "JOIN book_genre bg ON b.id = bg.book_id " +
-                    "WHERE bg.genre_id = " + id + ";";
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT b.id, b.name, b.price, b.author_id " +
+                "FROM book b " +
+                "JOIN book_genre bg ON b.id = bg.book_id " +
+                "WHERE bg.genre_id = " + id + ";";
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
 
             if (!resultSet.next()) {
                 String message = "Жанр с id " + id + " не найден";
@@ -232,8 +212,6 @@ public class BookRepositoryImpl implements BookRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return books;
     }

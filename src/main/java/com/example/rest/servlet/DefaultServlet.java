@@ -7,12 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public interface DefaultServlet {
 
-    void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException;
 
     void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException;
 

@@ -6,6 +6,7 @@ import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
+import comon.MySQLTestContainer;
 import comon.TestSetup;
 import db.impl.ConnectionManagerImpl;
 
@@ -24,9 +25,8 @@ public class TestbaseSetup extends TestSetup {
     private List<String> createTables = List.of(createAuthorTable, createBookTable, createGenreTable, createBookGenreTable);
 
     public void createBases() {
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
         try {
-            Connection connection = connectionManager.getConnection();
+            Connection connection = MySQLTestContainer.getConnection();
             Statement statement = connection.createStatement();
 
             Main.executeScript(dropTableFile, statement);
@@ -39,9 +39,9 @@ public class TestbaseSetup extends TestSetup {
             statement.close();
             connection.close();
 
-            AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl();
-            BookRepositoryImpl bookRepository = new BookRepositoryImpl();
-            GenreRepositoryImpl genreRepository = new GenreRepositoryImpl();
+            AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl(MySQLTestContainer.getConnection());
+            BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.getConnection());
+            GenreRepositoryImpl genreRepository = new GenreRepositoryImpl(MySQLTestContainer.getConnection());
             authorRepository.add(author1);
             authorRepository.add(author2);
 
@@ -50,6 +50,7 @@ public class TestbaseSetup extends TestSetup {
 
             List <Genre> genres = List.of(genre1, genre2, genre3);
             genres.forEach(genre -> genreRepository.add(genre));
+
             for (Book book : books) {
                 List <Genre> genreList = book.getGenres();
                 List <Integer> genresId = genreList.stream().map(Genre::getId).collect(Collectors.toList());

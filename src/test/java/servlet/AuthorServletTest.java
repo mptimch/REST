@@ -44,7 +44,7 @@ class AuthorServletTest extends TestSetup {
 
 
     @Test
-    void doGetTest() throws IOException, NoSuchEntityException, SQLException {
+    void doGetTest() throws Exception {
 
         when(response.getWriter()).thenReturn(writer);
         String stringDTO = "{\"name\":\"Лев Толстой\",\"books\":[\"Война и мир\",\"Анна Каренина\"]}";

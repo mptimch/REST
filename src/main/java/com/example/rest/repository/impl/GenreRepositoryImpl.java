@@ -4,28 +4,26 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.GenreRepository;
 import com.example.rest.repository.mapper.GenreResultSetMapperImpl;
-import db.impl.ConnectionManagerImpl;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GenreRepositoryImpl implements GenreRepository {
-    private ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
     private GenreResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.genreResultSetMapper;
 
     private Connection connection;
-    private Statement statement;
-    private ResultSet resultSet = null;
+
+    public GenreRepositoryImpl(Connection connection) {
+        this.connection = connection;
+    }
 
 
     @Override
     public Genre findById(Integer id) throws NoSuchEntityException {
         Genre genre = new Genre();
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM genre WHERE id = " + id + ";");
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM genre WHERE id = " + id + ";")) {
 
             if (!resultSet.next()) {
                 String message = "Жанр с id " + id + " не найден";
@@ -37,8 +35,6 @@ public class GenreRepositoryImpl implements GenreRepository {
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return genre;
     }
@@ -46,14 +42,10 @@ public class GenreRepositoryImpl implements GenreRepository {
     @Override
     public boolean deleteById(Integer id) {
         boolean succsess = false;
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             succsess = statement.execute("DELETE FROM genre WHERE id = " + id + ";");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return succsess;
     }
@@ -61,11 +53,10 @@ public class GenreRepositoryImpl implements GenreRepository {
     @Override
     public boolean add(Genre genre) throws IllegalArgumentException {
         boolean result = false;
-        try {
-            connection = connectionManager.getConnection();
-            String name = genre.getName();
-            String sql = "INSERT INTO genre (name) VALUES (?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String name = genre.getName();
+        String sql = "INSERT INTO genre (name) VALUES (?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             preparedStatement.setString(1, name);
             int count = preparedStatement.executeUpdate();
 
@@ -83,13 +74,10 @@ public class GenreRepositoryImpl implements GenreRepository {
     public boolean add(Genre genre, List<Integer> booksId) throws IllegalArgumentException {
         boolean result = false;
         int genreId = 0;
-        try {
-            connection = connectionManager.getConnection();
-            result = add(genre);
-
-            String query = "SELECT MAX(id) FROM genre;";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+        result = add(genre);
+        String query = "SELECT MAX(id) FROM genre;";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
 
             if (resultSet.next()) {
                 genreId = resultSet.getInt(1);
@@ -105,6 +93,7 @@ public class GenreRepositoryImpl implements GenreRepository {
             }
 
             insertBookGenreStatement.executeBatch();
+            insertBookGenreStatement.close();
             result = true;
 
         } catch (SQLException e) {
@@ -117,10 +106,8 @@ public class GenreRepositoryImpl implements GenreRepository {
     @Override
     public boolean update(Genre genre) throws NoSuchEntityException {
         boolean success = false;
-        try {
-            connection = connectionManager.getConnection();
-            String sql = "UPDATE genre SET name = ? WHERE id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "UPDATE genre SET name = ? WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, genre.getName());
             statement.setInt(2, genre.getId());
             int rowsUpdated = statement.executeUpdate();
@@ -145,9 +132,8 @@ public class GenreRepositoryImpl implements GenreRepository {
         String deleteBookGenreQuery = "DELETE FROM book_genre WHERE genre_id = ?";
         String insertBookGenreQuery = "INSERT INTO book_genre (book_id, genre_id) VALUES (?, ?)";
 
-        try (Connection resourceConnection = connectionManager.getConnection();
-             PreparedStatement deleteBookGenreStatement = resourceConnection.prepareStatement(deleteBookGenreQuery);
-             PreparedStatement insertBookGenreStatement = resourceConnection.prepareStatement(insertBookGenreQuery)) {
+        try (PreparedStatement deleteBookGenreStatement = connection.prepareStatement(deleteBookGenreQuery);
+             PreparedStatement insertBookGenreStatement = connection.prepareStatement(insertBookGenreQuery)) {
 
 
             deleteBookGenreStatement.setInt(1, genre.getId());
@@ -159,6 +145,7 @@ public class GenreRepositoryImpl implements GenreRepository {
                 insertBookGenreStatement.addBatch();
             }
             insertBookGenreStatement.executeBatch();
+            insertBookGenreStatement.close();
 
             success = true;
         } catch (SQLException e) {
@@ -171,20 +158,17 @@ public class GenreRepositoryImpl implements GenreRepository {
     @Override
     public List<Genre> getGenresByBookId(int id) {
         List<Genre> genres = new ArrayList<>();
-        try {
-            connection = connectionManager.getConnection();
-            statement = connection.createStatement();
-            String sql = "SELECT g.id, g.name" +
-                    "FROM genre g" +
-                    "JOIN book_genre bg ON g.id = bg.genre_id " +
-                    "WHERE bg.book_id = " + id + ";";
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT g.id, g.name" +
+                "FROM genre g" +
+                "JOIN book_genre bg ON g.id = bg.genre_id " +
+                "WHERE bg.book_id = " + id + ";";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
 
             if (!resultSet.next()) {
                 String message = "Книг с id " + id + " не найден";
                 throw new NoSuchEntityException(id, message);
             }
-
 
             while (resultSet.next()) {
                 resultSetMapper = RepositoryMapperStorage.getGenreResultSetMapper();
@@ -194,8 +178,6 @@ public class GenreRepositoryImpl implements GenreRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connectionManager.closeConnection(resultSet, statement, connection);
         }
         return genres;
     }

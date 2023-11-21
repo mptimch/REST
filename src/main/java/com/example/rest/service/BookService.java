@@ -59,11 +59,7 @@ public class BookService implements SimpleService<BookIncomingDTO> {
         book.setId(dto.getId());
         book.setName(dto.getName());
         book.setPrice(dto.getPrice());
-        if (dto.getGenresId() == null) {
-            result = bookRepository.update(book);
-        } else {
-            result = bookRepository.update(book, dto.getAuthorId(), dto.getGenresId());
-        }
+        result = bookRepository.update(book);
         return result;
     }
 
