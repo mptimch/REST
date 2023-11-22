@@ -1,15 +1,11 @@
 package com.example.rest.servlet;
 
-import com.example.rest.dto.GenreIncomingDTO;
-import com.example.rest.service.Genreservice;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public interface DefaultServlet {
 

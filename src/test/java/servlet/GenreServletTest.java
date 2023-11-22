@@ -1,7 +1,7 @@
 package servlet;
 
 import com.example.rest.exceptions.NoSuchEntityException;
-import com.example.rest.service.Genreservice;
+import com.example.rest.service.GenreService;
 import com.example.rest.servlet.GenreServlet;
 import comon.TestSetup;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class GenreServletTest extends TestSetup {
 
     @Mock
-    private Genreservice genreservice = mock(Genreservice.class);
+    private GenreService genreservice = mock(GenreService.class);
 
     HttpServletRequest request;
     HttpServletResponse response;
@@ -35,7 +35,7 @@ class GenreServletTest extends TestSetup {
 
     GenreServlet servlet = new GenreServlet() {
         @Override
-        protected Genreservice createGenreService() {
+        protected GenreService createGenreService() {
             return genreservice;
         }
     };

@@ -3,7 +3,6 @@ package repository;
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Author;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
-import com.example.rest.repository.impl.RepositoryMapperStorage;
 import comon.MySQLTestContainer;
 import db.impl.ConnectionManagerImpl;
 import org.junit.jupiter.api.BeforeAll;

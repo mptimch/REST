@@ -35,16 +35,13 @@ public class ConnectionManagerImpl implements ConnectionManager {
         }
     }
 
-
-    public void closeConnection(ResultSet resultSet, Statement statement, Connection connection) {
-            try {
-                statement.close();
-                connection.close();
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public static Connection checkConnection (Connection connection) throws SQLException {
+        try {
+            connection.createStatement();
+        } catch (SQLException e) {
+            connection = new ConnectionManagerImpl().getConnection();
+            return connection;
         }
+        return connection;
+    }
     }

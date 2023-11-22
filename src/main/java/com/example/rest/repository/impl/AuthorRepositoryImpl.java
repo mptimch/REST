@@ -4,11 +4,13 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Author;
 import com.example.rest.repository.AuthorRepository;
 import com.example.rest.repository.mapper.AuthorResultSetMapperImpl;
+import db.impl.ConnectionManagerImpl;
 
 import java.sql.*;
 
 public class AuthorRepositoryImpl implements AuthorRepository {
-    private AuthorResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.getAuthorResultSetMapper();
+//    private AuthorResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.getAuthorResultSetMapper();
+    private  AuthorResultSetMapperImpl resultSetMapper = new AuthorResultSetMapperImpl();
 
     private Connection connection;
 
@@ -17,8 +19,9 @@ public class AuthorRepositoryImpl implements AuthorRepository {
     }
 
     @Override
-    public Author findById(Integer id) throws NoSuchEntityException {
+    public Author findById(Integer id) throws NoSuchEntityException, SQLException {
         Author author = new Author();
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM author WHERE id = " + id + ";")) {
 
@@ -38,7 +41,8 @@ public class AuthorRepositoryImpl implements AuthorRepository {
 
 
     @Override
-    public boolean deleteById(Integer id) {
+    public boolean deleteById(Integer id) throws SQLException {
+        connection = ConnectionManagerImpl.checkConnection(connection);
         boolean succsess = false;
         try (Statement statement = connection.createStatement()) {
             succsess = statement.execute("DELETE FROM author WHERE id = " + id + ";");
@@ -51,10 +55,11 @@ public class AuthorRepositoryImpl implements AuthorRepository {
 
 
     @Override
-    public boolean add(Author author) throws IllegalArgumentException {
+    public boolean add(Author author) throws IllegalArgumentException, SQLException {
         boolean result = false;
         String name = author.getName();
         String sql = "INSERT INTO author (name) VALUES (?)";
+        connection = ConnectionManagerImpl.checkConnection(connection);
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, name);
@@ -73,9 +78,10 @@ public class AuthorRepositoryImpl implements AuthorRepository {
 
 
     @Override
-    public boolean update(Author author) throws NoSuchEntityException {
+    public boolean update(Author author) throws NoSuchEntityException, SQLException {
         boolean success = false;
         String sql = "UPDATE author SET name = ? WHERE id = ?";
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             findById(author.getId());
 

@@ -5,7 +5,7 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
-import com.example.rest.service.Genreservice;
+import com.example.rest.service.GenreService;
 import comon.TestSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,7 +27,7 @@ public class GenreServiceTest extends TestSetup {
     private GenreRepositoryImpl genreRepository = Mockito.mock(GenreRepositoryImpl.class);
 
     @InjectMocks
-    private Genreservice genreservice = new Genreservice(genreRepository);
+    private GenreService genreservice = new GenreService(genreRepository);
 
 
     @Test

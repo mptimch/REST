@@ -12,11 +12,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Genreservice implements SimpleService <GenreIncomingDTO>{
+public class GenreService implements SimpleService <GenreIncomingDTO>{
 
     GenreRepositoryImpl genreRepository;
 
-    public Genreservice(GenreRepositoryImpl genreRepository) {
+    public GenreService(GenreRepositoryImpl genreRepository) {
         this.genreRepository = genreRepository;
     }
 

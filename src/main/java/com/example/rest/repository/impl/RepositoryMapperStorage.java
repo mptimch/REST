@@ -39,9 +39,9 @@ public class RepositoryMapperStorage {
         }
     }
 
-    static AuthorResultSetMapperImpl authorResultSetMapper = new AuthorResultSetMapperImpl();
-    static BookResultSetMapperImpl bookResultSetMapper = new BookResultSetMapperImpl();
-    static GenreResultSetMapperImpl genreResultSetMapper = new GenreResultSetMapperImpl();
+//    static AuthorResultSetMapperImpl authorResultSetMapper = new AuthorResultSetMapperImpl();
+//    static BookResultSetMapperImpl bookResultSetMapper = new BookResultSetMapperImpl();
+//    static GenreResultSetMapperImpl genreResultSetMapper = new GenreResultSetMapperImpl();
 
     public static AuthorRepositoryImpl getAuthorRepository() {
         return authorRepository;
@@ -55,15 +55,15 @@ public class RepositoryMapperStorage {
         return genreRepository;
     }
 
-    public static AuthorResultSetMapperImpl getAuthorResultSetMapper() {
-        return authorResultSetMapper;
-    }
-
-    public static BookResultSetMapperImpl getBookResultSetMapper() {
-        return bookResultSetMapper;
-    }
-
-    public static GenreResultSetMapperImpl getGenreResultSetMapper() {
-        return genreResultSetMapper;
-    }
+//    public static AuthorResultSetMapperImpl getAuthorResultSetMapper() {
+//        return authorResultSetMapper;
+//    }
+//
+//    public static BookResultSetMapperImpl getBookResultSetMapper() {
+//        return bookResultSetMapper;
+//    }
+//
+//    public static GenreResultSetMapperImpl getGenreResultSetMapper() {
+//        return genreResultSetMapper;
+//    }
 }

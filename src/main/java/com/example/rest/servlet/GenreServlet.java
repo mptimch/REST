@@ -2,7 +2,7 @@ package com.example.rest.servlet;
 
 import com.example.rest.dto.GenreIncomingDTO;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
-import com.example.rest.service.Genreservice;
+import com.example.rest.service.GenreService;
 import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,7 +20,7 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String stringId = request.getParameter("id");
-        Genreservice genreservice = createGenreService();
+        GenreService genreservice = createGenreService();
         String genreJson = null;
         try {
             if (stringId != null) {
@@ -39,7 +39,7 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
 
     public void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String stringId = request.getParameter("id");
-        Genreservice genreservice = createGenreService();
+        GenreService genreservice = createGenreService();
         boolean isDeleted = false;
         try {
             if (stringId != null) {
@@ -67,7 +67,7 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
 
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Genreservice service = createGenreService();
+        GenreService service = createGenreService();
         String action = request.getParameter("action");
         GenreIncomingDTO dto = null;
         boolean hasRelations = request.getParameter("booksId").isEmpty();
@@ -115,10 +115,10 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
         return dto;
     }
 
-    protected Genreservice createGenreService() {
-        Genreservice genreservice = null;
+    protected GenreService createGenreService() {
+        GenreService genreservice = null;
         try {
-            genreservice = new Genreservice(new GenreRepositoryImpl(new ConnectionManagerImpl().getConnection()));
+            genreservice = new GenreService(new GenreRepositoryImpl(new ConnectionManagerImpl().getConnection()));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

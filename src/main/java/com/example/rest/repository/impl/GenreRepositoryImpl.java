@@ -4,6 +4,7 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.GenreRepository;
 import com.example.rest.repository.mapper.GenreResultSetMapperImpl;
+import db.impl.ConnectionManagerImpl;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,8 +21,9 @@ public class GenreRepositoryImpl implements GenreRepository {
 
 
     @Override
-    public Genre findById(Integer id) throws NoSuchEntityException {
+    public Genre findById(Integer id) throws NoSuchEntityException, SQLException {
         Genre genre = new Genre();
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM genre WHERE id = " + id + ";")) {
 
@@ -40,8 +42,9 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public boolean deleteById(Integer id) {
+    public boolean deleteById(Integer id) throws SQLException {
         boolean succsess = false;
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (Statement statement = connection.createStatement()) {
             succsess = statement.execute("DELETE FROM genre WHERE id = " + id + ";");
         } catch (Exception e) {
@@ -51,10 +54,11 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
     @Override
-    public boolean add(Genre genre) throws IllegalArgumentException {
+    public boolean add(Genre genre) throws IllegalArgumentException, SQLException {
         boolean result = false;
         String name = genre.getName();
         String sql = "INSERT INTO genre (name) VALUES (?)";
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, name);
@@ -71,11 +75,12 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
 
-    public boolean add(Genre genre, List<Integer> booksId) throws IllegalArgumentException {
+    public boolean add(Genre genre, List<Integer> booksId) throws IllegalArgumentException, SQLException {
         boolean result = false;
         int genreId = 0;
         result = add(genre);
         String query = "SELECT MAX(id) FROM genre;";
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -104,9 +109,10 @@ public class GenreRepositoryImpl implements GenreRepository {
 
 
     @Override
-    public boolean update(Genre genre) throws NoSuchEntityException {
+    public boolean update(Genre genre) throws NoSuchEntityException, SQLException {
         boolean success = false;
         String sql = "UPDATE genre SET name = ? WHERE id = ?";
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, genre.getName());
             statement.setInt(2, genre.getId());
@@ -125,12 +131,13 @@ public class GenreRepositoryImpl implements GenreRepository {
     }
 
 
-    public boolean update(Genre genre, List<Integer> booksId) throws NoSuchEntityException {
+    public boolean update(Genre genre, List<Integer> booksId) throws NoSuchEntityException, SQLException {
         update(genre);
         boolean success = false;
 
         String deleteBookGenreQuery = "DELETE FROM book_genre WHERE genre_id = ?";
         String insertBookGenreQuery = "INSERT INTO book_genre (book_id, genre_id) VALUES (?, ?)";
+        connection = ConnectionManagerImpl.checkConnection(connection);
 
         try (PreparedStatement deleteBookGenreStatement = connection.prepareStatement(deleteBookGenreQuery);
              PreparedStatement insertBookGenreStatement = connection.prepareStatement(insertBookGenreQuery)) {
@@ -156,12 +163,13 @@ public class GenreRepositoryImpl implements GenreRepository {
 
 
     @Override
-    public List<Genre> getGenresByBookId(int id) {
+    public List<Genre> getGenresByBookId(int id) throws SQLException {
         List<Genre> genres = new ArrayList<>();
         String sql = "SELECT g.id, g.name" +
                 "FROM genre g" +
                 "JOIN book_genre bg ON g.id = bg.genre_id " +
                 "WHERE bg.book_id = " + id + ";";
+        connection = ConnectionManagerImpl.checkConnection(connection);
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
