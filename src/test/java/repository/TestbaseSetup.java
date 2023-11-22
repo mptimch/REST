@@ -46,10 +46,14 @@ public class TestbaseSetup extends TestSetup {
             authorRepository.add(author2);
 
             List <Book> books = List.of(book1, book2, book3);
-            books.forEach(book -> bookRepository.add(book));
+            for (Book book : books) {
+                bookRepository.add(book);
+            }
 
             List <Genre> genres = List.of(genre1, genre2, genre3);
-            genres.forEach(genre -> genreRepository.add(genre));
+            for (Genre genre4 : genres) {
+                genreRepository.add(genre4);
+            }
 
             for (Book book : books) {
                 List <Genre> genreList = book.getGenres();

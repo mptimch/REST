@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GenreRepositoryImpl implements GenreRepository {
-    private GenreResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.genreResultSetMapper;
+    private GenreResultSetMapperImpl resultSetMapper = new GenreResultSetMapperImpl();
 
     private Connection connection;
 
@@ -32,7 +32,7 @@ public class GenreRepositoryImpl implements GenreRepository {
                 throw new NoSuchEntityException(id, message);
             }
 
-            resultSetMapper = RepositoryMapperStorage.getGenreResultSetMapper();
+            resultSetMapper = new GenreResultSetMapperImpl();
             genre = resultSetMapper.map(resultSet);
 
         } catch (SQLException e) {
@@ -179,7 +179,7 @@ public class GenreRepositoryImpl implements GenreRepository {
             }
 
             while (resultSet.next()) {
-                resultSetMapper = RepositoryMapperStorage.getGenreResultSetMapper();
+                resultSetMapper = new GenreResultSetMapperImpl();
                 Genre genre = resultSetMapper.getGenresByBookId(resultSet);
                 genres.add(genre);
             }

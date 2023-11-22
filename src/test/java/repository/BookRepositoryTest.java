@@ -53,14 +53,14 @@ BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.ge
     }
 
     @Test
-    void findByIdTest() throws NoSuchEntityException {
+    void findByIdTest() throws NoSuchEntityException, SQLException {
         Book gettedBook = bookRepository.findById(2);
         assertNotNull(gettedBook);
 
     }
 
     @Test
-    void deleteByIdTest() throws NoSuchEntityException {
+    void deleteByIdTest() throws NoSuchEntityException, SQLException {
         Book book = bookRepository.findById(1);
         bookRepository.deleteById(1);
         assertThrows(NoSuchEntityException.class, () -> bookRepository.findById(1));

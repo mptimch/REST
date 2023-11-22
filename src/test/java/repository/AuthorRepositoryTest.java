@@ -58,14 +58,14 @@ class AuthorRepositoryTest extends MySQLTestContainer {
     }
 
     @Test
-    void findByIdTest() throws NoSuchEntityException {
+    void findByIdTest() throws NoSuchEntityException, SQLException {
         Author gettedAuthor = authorRepository.findById(2);
         assertNotNull(gettedAuthor);
 
     }
 
     @Test
-    void deleteByIdTest() throws NoSuchEntityException {
+    void deleteByIdTest() throws NoSuchEntityException, SQLException {
         Author author = authorRepository.findById(1);
         authorRepository.deleteById(1);
         assertThrows(NoSuchEntityException.class, () -> authorRepository.findById(1));

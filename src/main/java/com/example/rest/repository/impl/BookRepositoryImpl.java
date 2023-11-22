@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookRepositoryImpl implements BookRepository {
-    private BookResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.getBookResultSetMapper();
+    private BookResultSetMapperImpl resultSetMapper = new BookResultSetMapperImpl();
 
     private Connection connection;
 
@@ -31,7 +31,7 @@ public class BookRepositoryImpl implements BookRepository {
                 throw new NoSuchEntityException(id, message);
             }
 
-            resultSetMapper = RepositoryMapperStorage.getBookResultSetMapper();
+            resultSetMapper = new BookResultSetMapperImpl();
             book = resultSetMapper.map(resultSet);
 
         } catch (SQLException e) {
@@ -185,7 +185,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             while (resultSet.next()) {
-                resultSetMapper = RepositoryMapperStorage.getBookResultSetMapper();
+                resultSetMapper = new BookResultSetMapperImpl();
                 Book book = resultSetMapper.getBooksByAuthorId(resultSet);
                 books.add(book);
             }
@@ -214,7 +214,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             while (resultSet.next()) {
-                resultSetMapper = RepositoryMapperStorage.getBookResultSetMapper();
+                resultSetMapper = new BookResultSetMapperImpl();
                 Book book = resultSetMapper.getBooksByAuthorId(resultSet);
                 books.add(book);
             }

@@ -50,14 +50,14 @@ public class GenreRepositoryTest extends MySQLTestContainer {
     }
 
     @Test
-    void findByIdTest() throws NoSuchEntityException {
+    void findByIdTest() throws NoSuchEntityException, SQLException {
         Genre genre = genreRepository.findById(2);
         assertNotNull(genre);
 
     }
 
     @Test
-    void deleteByIdTest() throws NoSuchEntityException {
+    void deleteByIdTest() throws NoSuchEntityException, SQLException {
         genreRepository.deleteById(1);
         assertThrows(NoSuchEntityException.class, () -> genreRepository.findById(1));
     }

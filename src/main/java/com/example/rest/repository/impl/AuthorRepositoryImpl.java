@@ -9,7 +9,6 @@ import db.impl.ConnectionManagerImpl;
 import java.sql.*;
 
 public class AuthorRepositoryImpl implements AuthorRepository {
-//    private AuthorResultSetMapperImpl resultSetMapper = RepositoryMapperStorage.getAuthorResultSetMapper();
     private  AuthorResultSetMapperImpl resultSetMapper = new AuthorResultSetMapperImpl();
 
     private Connection connection;
@@ -30,7 +29,7 @@ public class AuthorRepositoryImpl implements AuthorRepository {
                 String message = "Пользователь с id " + id + " не найден";
                 throw new NoSuchEntityException(id, message);
             }
-            resultSetMapper = RepositoryMapperStorage.getAuthorResultSetMapper();
+            resultSetMapper = new AuthorResultSetMapperImpl();
             author = resultSetMapper.map(resultSet);
 
         } catch (SQLException e) {
