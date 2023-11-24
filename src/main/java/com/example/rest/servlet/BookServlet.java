@@ -7,6 +7,7 @@ import java.util.List;
 import com.example.rest.dto.BookIncomingDTO;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.example.rest.service.BookService;
+import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
@@ -113,7 +114,7 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
 
     protected BookService createBookService() {
         BookService bookService = null;
-        bookService = new BookService(new BookRepositoryImpl());
+        bookService = new BookService(new BookRepositoryImpl(new ConnectionManagerImpl()));
         return bookService;
     }
 }

@@ -17,22 +17,14 @@ import java.util.stream.Collectors;
 public class GenreService implements SimpleService <GenreIncomingDTO>{
 
     GenreRepositoryImpl genreRepository;
-    ConnectionManagerImpl connectionManager;
 
     public GenreService(GenreRepositoryImpl genreRepository) {
         this.genreRepository = genreRepository;
-         connectionManager = new ConnectionManagerImpl();
-    }
-
-    public GenreService(GenreRepositoryImpl genreRepository, ConnectionManagerImpl connectionManager) {
-        this.genreRepository = genreRepository;
-        this.connectionManager = connectionManager;
     }
 
     @Override
     public String findById(int id) throws SQLException, NoSuchEntityException {
-        try (Connection connection = connectionManager.getConnection()) {
-            Genre genre = genreRepository.findById(id, connection);
+            Genre genre = genreRepository.findById(id);
             GenreToResponseDTO dto = new GenreToResponseDTO();
             dto.setName(genre.getName());
 
@@ -45,15 +37,12 @@ public class GenreService implements SimpleService <GenreIncomingDTO>{
             Gson gson = new Gson();
             String json = gson.toJson(dto);
             return json;
-        }
     }
 
     @Override
     public boolean delete(int id) throws SQLException, NoSuchEntityException {
-        try (Connection connection = connectionManager.getConnection()) {
-            boolean isDeleted = genreRepository.deleteById(id, connection);
+            boolean isDeleted = genreRepository.deleteById(id);
             return isDeleted;
-        }
     }
 
     @Override
@@ -62,14 +51,12 @@ public class GenreService implements SimpleService <GenreIncomingDTO>{
         Genre genre = new Genre();
         genre.setId(dto.getId());
         genre.setName(dto.getName());
-        try (Connection connection = connectionManager.getConnection()) {
             if (dto.getBooksId() == null) {
-                result = genreRepository.add(genre, connection);
+                result = genreRepository.add(genre);
             } else {
-                result = genreRepository.add(genre, dto.getBooksId(), connection);
+                result = genreRepository.add(genre, dto.getBooksId());
             }
             return result;
-        }
     }
 
     @Override
@@ -78,13 +65,11 @@ public class GenreService implements SimpleService <GenreIncomingDTO>{
         Genre genre = new Genre();
         genre.setId(dto.getId());
         genre.setName(dto.getName());
-        try (Connection connection = connectionManager.getConnection()) {
             if (dto.getBooksId() == null) {
-                result = genreRepository.update(genre, connection);
+                result = genreRepository.update(genre);
             } else {
-                result = genreRepository.update(genre, dto.getBooksId(), connection);
+                result = genreRepository.update(genre, dto.getBooksId());
             }
             return result;
         }
-    }
 }

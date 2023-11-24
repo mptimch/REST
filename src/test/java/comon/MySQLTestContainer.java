@@ -34,7 +34,7 @@ public class MySQLTestContainer extends TestbaseSetup {
     public static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.26")
             .withDatabaseName("aston_rest")
             .withUsername("mptimchenko")
-            .withPassword("12341990").withReuse(false);
+            .withPassword("12341990");
 
 
     @BeforeAll

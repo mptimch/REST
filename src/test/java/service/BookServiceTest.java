@@ -31,12 +31,12 @@ public class BookServiceTest extends TestSetup {
     @Mock
     ConnectionManagerImpl connectionManager = Mockito.mock(ConnectionManagerImpl.class);
 
-    private BookService bookService = new BookService(bookRepository, connectionManager);
+    private BookService bookService = new BookService(bookRepository);
 
     @Test
     void findByIdNormalTest() throws SQLException, NoSuchEntityException {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
-        Mockito.when(bookRepository.findById(1, connectionManager.getConnection())).thenReturn(book1);
+        Mockito.when(bookRepository.findById(1)).thenReturn(book1);
         String equals = bookService.findById(1);
         String expected = "{\"name\":\"Война и мир\"," +
                 "\"price\":1867," +
@@ -48,7 +48,7 @@ public class BookServiceTest extends TestSetup {
     @Test
     void findByIdExceptionTest() throws SQLException, NoSuchEntityException {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
-        Mockito.when(bookRepository.findById(299, connectionManager.getConnection())).thenThrow(NoSuchEntityException.class);
+        Mockito.when(bookRepository.findById(299)).thenThrow(NoSuchEntityException.class);
         assertThrows(NoSuchEntityException.class, () -> bookService.findById(299));
     }
 
@@ -59,8 +59,8 @@ public class BookServiceTest extends TestSetup {
     })
     void deleteTest(int id, boolean result) throws SQLException, NoSuchEntityException {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
-        Mockito.when(bookRepository.deleteById(182, connectionManager.getConnection())).thenReturn(true);
-        Mockito.when(bookRepository.deleteById(999, connectionManager.getConnection())).thenReturn(false);
+        Mockito.when(bookRepository.deleteById(182)).thenReturn(true);
+        Mockito.when(bookRepository.deleteById(999)).thenReturn(false);
         boolean isDeleted = bookService.delete(id);
         assertEquals(isDeleted, result);
     }
@@ -70,7 +70,7 @@ public class BookServiceTest extends TestSetup {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
         BookIncomingDTO dto = createDTO(book1);
         Mockito.when(bookRepository.add(Mockito.any(Book.class),
-                Mockito.anyInt(), Mockito.anyList(), Mockito.nullable(Connection.class))).thenReturn(true);
+                Mockito.anyInt(), Mockito.anyList())).thenReturn(true);
         boolean added = bookService.add(dto);
         assertEquals(added, true);
     }
@@ -81,7 +81,7 @@ public class BookServiceTest extends TestSetup {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
         BookIncomingDTO dto = createDTO(book1);
         Mockito.when(bookRepository.add(Mockito.any(Book.class),
-                Mockito.anyInt(), Mockito.anyList(), Mockito.nullable(Connection.class))).thenThrow(IllegalArgumentException.class);
+                Mockito.anyInt(), Mockito.anyList())).thenThrow(IllegalArgumentException.class);
         assertThrows(IllegalArgumentException.class, () -> bookService.add(dto));
     }
 
@@ -89,7 +89,7 @@ public class BookServiceTest extends TestSetup {
     @Test
     void updateTestNormal() throws SQLException, NoSuchEntityException {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
-        Mockito.when(bookRepository.update(Mockito.any(Book.class), Mockito.nullable(Connection.class))).thenReturn(true);
+        Mockito.when(bookRepository.update(Mockito.any(Book.class))).thenReturn(true);
         BookIncomingDTO dto = createDTO(book3);
         dto.setGenresId(null);
         boolean added = bookService.update(dto);
@@ -102,7 +102,7 @@ public class BookServiceTest extends TestSetup {
         Mockito.when(connectionManager.getConnection()).thenReturn(null);
         BookIncomingDTO dto = createDTO(book3);
         dto.setGenresId(null);
-        Mockito.when(bookRepository.update(Mockito.any(), Mockito.nullable(Connection.class))).thenThrow(NoSuchEntityException.class);
+        Mockito.when(bookRepository.update(Mockito.any())).thenThrow(NoSuchEntityException.class);
         assertThrows(NoSuchEntityException.class, () -> bookService.update(dto));
     }
 

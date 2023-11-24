@@ -4,6 +4,7 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.repository.BookRepository;
 import com.example.rest.repository.mapper.BookResultSetMapperImpl;
+import db.impl.ConnectionManagerImpl;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,10 +12,17 @@ import java.util.List;
 
 public class BookRepositoryImpl implements BookRepository {
 
+    ConnectionManagerImpl connectionManager;
+
+    public BookRepositoryImpl(ConnectionManagerImpl connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
     @Override
-    public Book findById(Integer id, Connection connection) throws NoSuchEntityException, SQLException {
+    public Book findById(Integer id) throws NoSuchEntityException, SQLException {
         Book book = new Book();
-        try (Statement statement = connection.createStatement();
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM book WHERE id = " + id + ";")) {
 
             if (!resultSet.isBeforeFirst()) {
@@ -22,7 +30,7 @@ public class BookRepositoryImpl implements BookRepository {
                 throw new NoSuchEntityException(id, message);
             }
 
-            book = new BookResultSetMapperImpl(connection).map(resultSet);
+            book = new BookResultSetMapperImpl(connectionManager).map(resultSet);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -30,9 +38,10 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public boolean deleteById(Integer id, Connection connection) throws SQLException {
+    public boolean deleteById(Integer id) throws SQLException {
         boolean succsess = false;
-        try (Statement statement = connection.createStatement()) {
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = connection.createStatement()) {
             succsess = statement.execute("DELETE FROM book WHERE id = " + id + ";");
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,11 +50,12 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public boolean add(Book book, Connection connection) throws IllegalArgumentException, SQLException {
+    public boolean add(Book book) throws IllegalArgumentException, SQLException {
         boolean result = false;
         String sql = "INSERT INTO book (name, price) VALUES (?, ?)";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, book.getName());
             preparedStatement.setInt(2, book.getPrice());
             int count = preparedStatement.executeUpdate();
@@ -60,12 +70,13 @@ public class BookRepositoryImpl implements BookRepository {
         return result;
     }
 
-    public boolean add(Book book, int authorId, List<Integer> genresId, Connection connection) throws IllegalArgumentException, SQLException {
+    public boolean add(Book book, int authorId, List<Integer> genresId) throws IllegalArgumentException, SQLException {
         boolean result = false;
         String name = book.getName();
         String sqlToBook = "INSERT INTO book (name, price, author_id) VALUES (?, ?, ?)";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlToBook, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlToBook, Statement.RETURN_GENERATED_KEYS)) {
             int bookId = 0;
             preparedStatement.setString(1, name);
             preparedStatement.setInt(2, book.getPrice());
@@ -99,12 +110,13 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public boolean update(Book book, Connection connection) throws NoSuchEntityException, SQLException {
+    public boolean update(Book book) throws NoSuchEntityException, SQLException {
         boolean success = false;
         String sql = "UPDATE book SET name = ?, price = ? WHERE id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            findById(book.getId(), connection);
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            findById(book.getId());
             statement.setString(1, book.getName());
             statement.setInt(2, book.getPrice());
             statement.setInt(3, book.getId());
@@ -118,14 +130,15 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
 
-    public boolean update(Book book, int authorId, List<Integer> genresId, Connection connection) throws NoSuchEntityException, SQLException {
-        update(book, connection);
+    public boolean update(Book book, int authorId, List<Integer> genresId) throws NoSuchEntityException, SQLException {
+        update(book);
         boolean success = false;
         String updateBookQuery = "UPDATE book SET author_id = ? WHERE id = ?";
         String deleteBookGenreQuery = "DELETE FROM book_genre WHERE book_id = ?";
         String insertBookGenreQuery = "INSERT INTO book_genre (book_id, genre_id) VALUES (?, ?)";
 
-        try (PreparedStatement updateBookStatement = connection.prepareStatement(updateBookQuery);
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement updateBookStatement = connection.prepareStatement(updateBookQuery);
              PreparedStatement deleteBookGenreStatement = connection.prepareStatement(deleteBookGenreQuery);
              PreparedStatement insertBookGenreStatement = connection.prepareStatement(insertBookGenreQuery)) {
 
@@ -151,11 +164,12 @@ public class BookRepositoryImpl implements BookRepository {
 
 
     @Override
-    public List<Book> getBooksByAuthorId(int id, Connection connection) throws SQLException {
+    public List<Book> getBooksByAuthorId(int id) throws SQLException {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM book WHERE author_id = " + id + ";";
 
-        try (Statement statement = connection.createStatement();
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
             if (!resultSet.isBeforeFirst()) {
@@ -164,7 +178,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             while (resultSet.next()) {
-                Book book = new BookResultSetMapperImpl(connection).getBooksByAuthorId(resultSet);
+                Book book = new BookResultSetMapperImpl(connectionManager).getBooksByAuthorId(resultSet);
                 books.add(book);
             }
         } catch (Exception e) {
@@ -174,14 +188,15 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public List<Book> getBooksByGenreId(int id, Connection connection) throws SQLException {
+    public List<Book> getBooksByGenreId(int id) throws SQLException {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT b.id, b.name, b.price, b.author_id " +
                 "FROM book b " +
                 "JOIN book_genre bg ON b.id = bg.book_id " +
                 "WHERE bg.genre_id = " + id + ";";
 
-        try (Statement statement = connection.createStatement();
+        try (Connection connection = connectionManager.getConnection();
+             Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
             if (!resultSet.next()) {
@@ -190,7 +205,7 @@ public class BookRepositoryImpl implements BookRepository {
             }
 
             while (resultSet.next()) {
-                Book book = new BookResultSetMapperImpl(connection).getBooksByAuthorId(resultSet);
+                Book book = new BookResultSetMapperImpl(connectionManager).getBooksByAuthorId(resultSet);
                 books.add(book);
             }
         } catch (Exception e) {

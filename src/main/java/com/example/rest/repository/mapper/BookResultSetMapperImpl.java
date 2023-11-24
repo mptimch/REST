@@ -4,6 +4,7 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
+import db.impl.ConnectionManagerImpl;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,9 +12,9 @@ import java.sql.SQLException;
 
 public class BookResultSetMapperImpl implements GeneralResultSetMapper {
 
-    Connection connection;
-    public BookResultSetMapperImpl(Connection connection) {
-        this.connection = connection;
+    ConnectionManagerImpl connectionManager;
+    public BookResultSetMapperImpl(ConnectionManagerImpl connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     @Override
@@ -24,8 +25,8 @@ public class BookResultSetMapperImpl implements GeneralResultSetMapper {
         book.setPrice(resultSet.getInt("price"));
         int authorId = resultSet.getInt("author_id");
 
-        book.setAuthor(new AuthorRepositoryImpl().findById(authorId, connection));
-        book.setGenres(new GenreRepositoryImpl().getGenresByBookId(resultSet.getInt("id"), connection));
+        book.setAuthor(new AuthorRepositoryImpl(connectionManager).findById(authorId));
+        book.setGenres(new GenreRepositoryImpl(connectionManager).getGenresByBookId(resultSet.getInt("id")));
         return book;
     }
 

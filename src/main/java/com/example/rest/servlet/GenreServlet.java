@@ -3,6 +3,7 @@ package com.example.rest.servlet;
 import com.example.rest.dto.GenreIncomingDTO;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import com.example.rest.service.GenreService;
+import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,7 +111,7 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
 
     protected GenreService createGenreService() {
         GenreService genreservice = null;
-        genreservice = new GenreService(new GenreRepositoryImpl());
+        genreservice = new GenreService(new GenreRepositoryImpl(new ConnectionManagerImpl()));
         return genreservice;
     }
 

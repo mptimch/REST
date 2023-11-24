@@ -2,6 +2,7 @@ package com.example.rest.repository.mapper;
 
 import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.BookRepositoryImpl;
+import db.impl.ConnectionManagerImpl;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -9,10 +10,10 @@ import java.sql.SQLException;
 
 public class GenreResultSetMapperImpl implements GeneralResultSetMapper {
 
-    Connection connection;
+    ConnectionManagerImpl connectionManager;
 
-    public GenreResultSetMapperImpl(Connection connection) {
-        this.connection = connection;
+    public GenreResultSetMapperImpl(ConnectionManagerImpl connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     @Override
@@ -20,7 +21,7 @@ public class GenreResultSetMapperImpl implements GeneralResultSetMapper {
         Genre genre = new Genre();
         genre.setId(resultSet.getInt("id"));
         genre.setName(resultSet.getString("name"));
-        genre.setBooks(new BookRepositoryImpl().getBooksByGenreId(resultSet.getInt("id"), connection));
+        genre.setBooks(new BookRepositoryImpl(connectionManager).getBooksByGenreId(resultSet.getInt("id")));
         return genre;
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface BookRepository extends SimpleRepository<Book, Integer>{
 
-    List<Book> getBooksByAuthorId(int id, Connection connection) throws SQLException;
+    List<Book> getBooksByAuthorId(int id) throws SQLException;
 
-    List <Book> getBooksByGenreId(int id, Connection connection) throws SQLException;
+    List <Book> getBooksByGenreId(int id) throws SQLException;
 }

@@ -15,23 +15,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AuthorService implements SimpleService<AuthorIncomingDTO> {
-    public ConnectionManagerImpl connectionManager;
     public AuthorRepositoryImpl authorRepository;
 
     public AuthorService(AuthorRepositoryImpl authorRepository) {
         this.authorRepository = authorRepository;
-        connectionManager = new ConnectionManagerImpl();
     }
 
-    public AuthorService(AuthorRepositoryImpl authorRepository, ConnectionManagerImpl connectionManager) {
-        this.connectionManager = connectionManager;
-        this.authorRepository = authorRepository;
-    }
+
 
     @Override
     public String findById(int id) throws SQLException, NoSuchEntityException {
-        try (Connection connection = connectionManager.getConnection()) {
-            Author author = authorRepository.findById(id, connection);
+            Author author = authorRepository.findById(id);
             AuthorToResponseDTO dto = new AuthorToResponseDTO();
             dto.setName(author.getName());
             List<Book> books = author.getBooks();
@@ -44,37 +38,30 @@ public class AuthorService implements SimpleService<AuthorIncomingDTO> {
             String json = gson.toJson(dto);
             return json;
         }
-    }
 
     @Override
     public boolean delete(int id) throws SQLException, NoSuchEntityException {
-        try (Connection connection = connectionManager.getConnection()) {
-            boolean isDeleted = authorRepository.deleteById(id, connection);
+            boolean isDeleted = authorRepository.deleteById(id);
             return isDeleted;
-        }
     }
 
     @Override
     public boolean add(AuthorIncomingDTO dto) throws SQLException, IllegalArgumentException {
-        try (Connection connection = connectionManager.getConnection()) {
             boolean result = false;
             Author author = new Author();
             author.setId(dto.getId());
             author.setName(dto.getName());
-            result = authorRepository.add(author, connection);
+            result = authorRepository.add(author);
             return result;
-        }
     }
 
     @Override
     public boolean update(AuthorIncomingDTO dto) throws SQLException, NoSuchEntityException {
-        try (Connection connection = connectionManager.getConnection()) {
             boolean result = false;
             Author author = new Author();
             author.setId(dto.getId());
             author.setName(dto.getName());
-            result = authorRepository.update(author, connection);
+            result = authorRepository.update(author);
             return result;
-        }
     }
 }
