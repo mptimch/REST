@@ -31,24 +31,16 @@ public class MySQLTestContainer extends TestbaseSetup {
     public static Genre genre3;
 
     @Container
-    private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.26")
+    public static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.26")
             .withDatabaseName("aston_rest")
             .withUsername("mptimchenko")
-            .withPassword("12341990").withReuse(true);
+            .withPassword("12341990").withReuse(false);
 
 
     @BeforeAll
     static void beforeAll() {
         mySQLContainer.start();
-
-        try (Connection connection = DriverManager.getConnection(mySQLContainer.getJdbcUrl(), mySQLContainer.getUsername(), mySQLContainer.getPassword());
-             Statement statement = connection.createStatement()) {
-            generateEntities();
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        generateEntities();
     }
 
 
@@ -76,7 +68,6 @@ public class MySQLTestContainer extends TestbaseSetup {
         genre2.setBooks(List.of(book1, book2));
         genre3.setBooks(List.of(book3));
 
-
         TestbaseSetup testbaseSetup = new TestbaseSetup();
         testbaseSetup.createBases();
 
@@ -86,8 +77,6 @@ public class MySQLTestContainer extends TestbaseSetup {
     static void afterAll() {
         mySQLContainer.stop();
     }
-
-
 
     @Test
     void testCurrentDateNotNull() throws Exception {
@@ -105,6 +94,4 @@ public class MySQLTestContainer extends TestbaseSetup {
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(mySQLContainer.getJdbcUrl(), mySQLContainer.getUsername(), mySQLContainer.getPassword());
     }
-
-
 }

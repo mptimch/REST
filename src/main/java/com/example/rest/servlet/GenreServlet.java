@@ -3,20 +3,17 @@ package com.example.rest.servlet;
 import com.example.rest.dto.GenreIncomingDTO;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import com.example.rest.service.GenreService;
-import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "genreServlet", value = "/genre")
 public class GenreServlet extends HttpServlet implements DefaultServlet {
-
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String stringId = request.getParameter("id");
@@ -29,7 +26,6 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
             } else {
                 sendErrorResponse(response, "Укажите Id нужного вам жанра");
             }
-
             sendResponse(response, genreJson);
 
         } catch (Exception e) {
@@ -59,12 +55,10 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().flush();
             }
-
         } catch (Exception e) {
             sendErrorResponse(response, e.getMessage());
         }
     }
-
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         GenreService service = createGenreService();
@@ -94,7 +88,6 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
         }
     }
 
-
     private GenreIncomingDTO createDtoWithoutRelations(HttpServletRequest request) {
         GenreIncomingDTO dto = new GenreIncomingDTO();
         dto.setId(Integer.parseInt(request.getParameter("id")));
@@ -117,11 +110,7 @@ public class GenreServlet extends HttpServlet implements DefaultServlet {
 
     protected GenreService createGenreService() {
         GenreService genreservice = null;
-        try {
-            genreservice = new GenreService(new GenreRepositoryImpl(new ConnectionManagerImpl().getConnection()));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        genreservice = new GenreService(new GenreRepositoryImpl());
         return genreservice;
     }
 

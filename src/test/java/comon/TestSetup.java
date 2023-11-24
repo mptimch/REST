@@ -3,13 +3,18 @@ package comon;
 import com.example.rest.model.Author;
 import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
+import com.example.rest.repository.impl.AuthorRepositoryImpl;
+import com.example.rest.repository.impl.BookRepositoryImpl;
+import com.example.rest.repository.impl.GenreRepositoryImpl;
+import db.impl.ConnectionManagerImpl;
 import org.junit.jupiter.api.BeforeAll;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.List;
 
 
 public class TestSetup {
-
     public static Author author1;
     public static Author author2;
     public static Book book1;
@@ -18,7 +23,6 @@ public class TestSetup {
     public static Genre genre1;
     public static Genre genre2;
     public static Genre genre3;
-
 
     @BeforeAll
     static void setUp() {

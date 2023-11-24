@@ -7,34 +7,46 @@ import com.example.rest.model.Book;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.google.gson.Gson;
+import db.impl.ConnectionManagerImpl;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BookService implements SimpleService<BookIncomingDTO> {
     BookRepositoryImpl bookRepository;
+    ConnectionManagerImpl connectionManager;
 
     public BookService(BookRepositoryImpl bookRepository) {
         this.bookRepository = bookRepository;
+        connectionManager = new ConnectionManagerImpl();
+    }
+
+    public BookService(BookRepositoryImpl bookRepository, ConnectionManagerImpl connectionManager) {
+        this.bookRepository = bookRepository;
+        this.connectionManager = connectionManager;
     }
 
     @Override
     public String findById(int id) throws SQLException, NoSuchEntityException {
-        Book book = bookRepository.findById(id);
-        BookToResponseDTO dto = new BookToResponseDTO();
-        fillBookToResponseDTO(dto, book);
+        try (Connection connection = connectionManager.getConnection()) {
+            Book book = bookRepository.findById(id, connection);
+            BookToResponseDTO dto = new BookToResponseDTO();
+            fillBookToResponseDTO(dto, book);
 
-        Gson gson = new Gson();
-        String json = gson.toJson(dto);
-        return json;
+            Gson gson = new Gson();
+            String json = gson.toJson(dto);
+            return json;
+        }
     }
-
 
     @Override
     public boolean delete(int id) throws SQLException, NoSuchEntityException {
-        boolean isDeleted = bookRepository.deleteById(id);
-        return isDeleted;
+        try (Connection connection = connectionManager.getConnection()) {
+            boolean isDeleted = bookRepository.deleteById(id, connection);
+            return isDeleted;
+        }
     }
 
     @Override
@@ -44,10 +56,12 @@ public class BookService implements SimpleService<BookIncomingDTO> {
         book.setId(dto.getId());
         book.setName(dto.getName());
         book.setPrice(dto.getPrice());
-        if (dto.getGenresId() == null) {
-            result = bookRepository.add(book);
-        } else {
-            result = bookRepository.add(book, dto.getAuthorId(), dto.getGenresId());
+        try (Connection connection = connectionManager.getConnection()) {
+            if (dto.getGenresId() == null) {
+                result = bookRepository.add(book, connection);
+            } else {
+                result = bookRepository.add(book, dto.getAuthorId(), dto.getGenresId(), connection);
+            }
         }
         return result;
     }
@@ -59,7 +73,9 @@ public class BookService implements SimpleService<BookIncomingDTO> {
         book.setId(dto.getId());
         book.setName(dto.getName());
         book.setPrice(dto.getPrice());
-        result = bookRepository.update(book);
+        try (Connection connection = connectionManager.getConnection()) {
+            result = bookRepository.update(book, connection);
+        }
         return result;
     }
 

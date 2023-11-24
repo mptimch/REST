@@ -2,12 +2,8 @@ package repository;
 
 import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Book;
-import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.repository.impl.BookRepositoryImpl;
-import com.example.rest.repository.impl.RepositoryMapperStorage;
 import comon.MySQLTestContainer;
-import comon.TestSetup;
-import db.impl.ConnectionManagerImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,17 +16,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BookRepositoryTest extends MySQLTestContainer {
 
-BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.getConnection());
+    BookRepositoryImpl bookRepository = new BookRepositoryImpl();
 
-    public BookRepositoryTest() throws SQLException {
+    @BeforeAll
+    static void setup() {
+        TestbaseSetup testbaseSetup = new TestbaseSetup();
+        testbaseSetup.createBases();
     }
-
     @Test
     void addTest() throws IllegalArgumentException, SQLException {
-        bookRepository.add(book1);
+        Connection connection = MySQLTestContainer.getConnection();
+        bookRepository.add(book1, connection);
         int id = 0;
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-        Connection connection = connectionManager.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT MAX(id) AS max_id FROM book;");
 
@@ -54,31 +51,34 @@ BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.ge
 
     @Test
     void findByIdTest() throws NoSuchEntityException, SQLException {
-        Book gettedBook = bookRepository.findById(2);
+        Connection connection = MySQLTestContainer.getConnection();
+        Book gettedBook = bookRepository.findById(2, connection);
         assertNotNull(gettedBook);
-
     }
 
     @Test
     void deleteByIdTest() throws NoSuchEntityException, SQLException {
-        Book book = bookRepository.findById(1);
-        bookRepository.deleteById(1);
-        assertThrows(NoSuchEntityException.class, () -> bookRepository.findById(1));
+        Connection connection = MySQLTestContainer.getConnection();
+        Book book = bookRepository.findById(1, connection);
+        bookRepository.deleteById(1, connection);
+        assertThrows(NoSuchEntityException.class, () -> bookRepository.findById(1, connection));
     }
 
     @Test
     void updateTestException() throws IllegalArgumentException, SQLException {
+        Connection connection = MySQLTestContainer.getConnection();
         book2.setId(54);
-        assertThrows(NoSuchEntityException.class, () -> bookRepository.update(book2));
+        assertThrows(NoSuchEntityException.class, () -> bookRepository.update(book2, connection));
     }
 
     @Test
     void updateTest() throws IllegalArgumentException, SQLException, NoSuchEntityException {
+        Connection connection = MySQLTestContainer.getConnection();
         Book book = new Book();
         book.setId(2);
         book.setName("Новое название");
         book.setPrice(850);
-        bookRepository.update(book);
+        bookRepository.update(book, connection);
         Statement statement = MySQLTestContainer.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT name FROM book WHERE 'id' = 2;");
         String genreName = "";
@@ -86,7 +86,6 @@ BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.ge
         if (resultSet.next()) {
             genreName = resultSet.getString("name");
             assertEquals(genreName, book1.getName());
-
         }
         resultSet.close();
         statement.close();

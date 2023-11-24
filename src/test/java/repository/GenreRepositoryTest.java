@@ -4,7 +4,7 @@ import com.example.rest.exceptions.NoSuchEntityException;
 import com.example.rest.model.Genre;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import comon.MySQLTestContainer;
-import db.impl.ConnectionManagerImpl;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -16,18 +16,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GenreRepositoryTest extends MySQLTestContainer {
 
-    GenreRepositoryImpl genreRepository = new GenreRepositoryImpl(MySQLTestContainer.getConnection());
+    GenreRepositoryImpl genreRepository = new GenreRepositoryImpl();
 
-    public GenreRepositoryTest() throws SQLException {
+    @BeforeAll
+    static void setup() {
+        TestbaseSetup testbaseSetup = new TestbaseSetup();
+        testbaseSetup.createBases();
     }
 
 
     @Test
     void addTest() throws IllegalArgumentException, SQLException {
-        genreRepository.add(genre1);
+        Connection connection = MySQLTestContainer.getConnection();
+        genreRepository.add(genre1, connection);
         int id = 0;
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-        Connection connection = connectionManager.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT MAX(id) AS max_id FROM genre;");
 
@@ -51,31 +53,32 @@ public class GenreRepositoryTest extends MySQLTestContainer {
 
     @Test
     void findByIdTest() throws NoSuchEntityException, SQLException {
-        Genre genre = genreRepository.findById(2);
+        Connection connection = MySQLTestContainer.getConnection();
+        Genre genre = genreRepository.findById(2, connection);
         assertNotNull(genre);
-
     }
 
     @Test
     void deleteByIdTest() throws NoSuchEntityException, SQLException {
-        genreRepository.deleteById(1);
-        assertThrows(NoSuchEntityException.class, () -> genreRepository.findById(1));
+        Connection connection = MySQLTestContainer.getConnection();
+        genreRepository.deleteById(1, connection);
+        assertThrows(NoSuchEntityException.class, () -> genreRepository.findById(1, connection));
     }
 
     @Test
     void updateTestException() throws IllegalArgumentException, SQLException {
+        Connection connection = MySQLTestContainer.getConnection();
         genre2.setId(54);
-        assertThrows(NoSuchEntityException.class, () -> genreRepository.update(genre2));
+        assertThrows(NoSuchEntityException.class, () -> genreRepository.update(genre2, connection));
     }
 
     @Test
     void updateTest() throws IllegalArgumentException, SQLException, NoSuchEntityException {
+        Connection connection = MySQLTestContainer.getConnection();
         Genre genre = new Genre();
         genre.setId(2);
         genre.setName("Новый жанр");
-        genreRepository.update(genre);
-        ConnectionManagerImpl connectionManager = new ConnectionManagerImpl();
-        Connection connection = connectionManager.getConnection();
+        genreRepository.update(genre, connection);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT name FROM genre WHERE 'id' = 2;");
         String genreName = "";

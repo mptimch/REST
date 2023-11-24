@@ -13,7 +13,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
     String user;
     String password;
 
-
     @Override
     public Connection getConnection() throws SQLException {
         getConnectionData();
@@ -34,14 +33,4 @@ public class ConnectionManagerImpl implements ConnectionManager {
             e.printStackTrace();
         }
     }
-
-    public static Connection checkConnection (Connection connection) throws SQLException {
-        try {
-            connection.createStatement();
-        } catch (SQLException e) {
-            connection = new ConnectionManagerImpl().getConnection();
-            return connection;
-        }
-        return connection;
-    }
-    }
+}

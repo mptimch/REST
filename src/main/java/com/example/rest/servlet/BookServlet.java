@@ -1,14 +1,12 @@
 package com.example.rest.servlet;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.rest.dto.BookIncomingDTO;
 import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.example.rest.service.BookService;
-import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
@@ -27,9 +25,7 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
                 sendErrorResponse(response, "Укажите Id нужной вам книги");
                 return;
             }
-
             sendResponse(response, bookJson);
-
         } catch (Exception e) {
             sendErrorResponse(response, e.getMessage());
         }
@@ -59,7 +55,6 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().flush();
             }
-
         } catch (Exception e) {
             sendErrorResponse(response, e.getMessage());
         }
@@ -77,7 +72,6 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
             } else {
                 dto = createDtoWithoutRelations(request);
             }
-
             boolean result = action.equals("add") ? service.add(dto) : service.update(dto);
 
             if (result) {
@@ -119,11 +113,7 @@ public class BookServlet extends HttpServlet implements DefaultServlet {
 
     protected BookService createBookService() {
         BookService bookService = null;
-        try {
-            bookService = new BookService(new BookRepositoryImpl(new ConnectionManagerImpl().getConnection()));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        bookService = new BookService(new BookRepositoryImpl());
         return bookService;
     }
 }

@@ -3,15 +3,12 @@ package com.example.rest.servlet;
 import com.example.rest.dto.AuthorIncomingDTO;
 import com.example.rest.repository.impl.AuthorRepositoryImpl;
 import com.example.rest.service.AuthorService;
-import com.mysql.cj.jdbc.ConnectionImpl;
-import db.impl.ConnectionManagerImpl;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 @WebServlet(name = "authorServlet", value = "/author")
 public class AuthorServlet extends HttpServlet implements DefaultServlet {
@@ -28,9 +25,7 @@ public class AuthorServlet extends HttpServlet implements DefaultServlet {
             } else {
                 sendErrorResponse(response, "Укажите Id нужного автора");
             }
-
             sendResponse(response, bookJson);
-
         } catch (Exception e) {
             sendErrorResponse(response, e.getMessage());
         }
@@ -59,7 +54,6 @@ public class AuthorServlet extends HttpServlet implements DefaultServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().flush();
             }
-
         } catch (Exception e) {
             sendErrorResponse(response, e.getMessage());
         }
@@ -92,7 +86,7 @@ public class AuthorServlet extends HttpServlet implements DefaultServlet {
     public AuthorService createAuthorService() {
         AuthorService service = null;
         try {
-            service = new AuthorService(new AuthorRepositoryImpl(new ConnectionManagerImpl().getConnection()));
+            service = new AuthorService(new AuthorRepositoryImpl());
         } catch (Exception e) {
             e.printStackTrace();
         }

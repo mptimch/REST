@@ -8,7 +8,6 @@ import com.example.rest.repository.impl.BookRepositoryImpl;
 import com.example.rest.repository.impl.GenreRepositoryImpl;
 import comon.MySQLTestContainer;
 import comon.TestSetup;
-import db.impl.ConnectionManagerImpl;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -28,7 +27,6 @@ public class TestbaseSetup extends TestSetup {
         try {
             Connection connection = MySQLTestContainer.getConnection();
             Statement statement = connection.createStatement();
-
             Main.executeScript(dropTableFile, statement);
 
             for (String query : createTables) {
@@ -37,35 +35,33 @@ public class TestbaseSetup extends TestSetup {
                 newStatement.close();
             }
             statement.close();
-            connection.close();
 
-            AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl(MySQLTestContainer.getConnection());
-            BookRepositoryImpl bookRepository = new BookRepositoryImpl(MySQLTestContainer.getConnection());
-            GenreRepositoryImpl genreRepository = new GenreRepositoryImpl(MySQLTestContainer.getConnection());
-            authorRepository.add(author1);
-            authorRepository.add(author2);
+            GenreRepositoryImpl genreRepository = new GenreRepositoryImpl();
+            BookRepositoryImpl bookRepository = new BookRepositoryImpl();
+            AuthorRepositoryImpl authorRepository = new AuthorRepositoryImpl();
+            authorRepository.add(author1, connection);
+            authorRepository.add(author2, connection);
 
             List <Book> books = List.of(book1, book2, book3);
             for (Book book : books) {
-                bookRepository.add(book);
+                bookRepository.add(book, connection);
             }
 
             List <Genre> genres = List.of(genre1, genre2, genre3);
             for (Genre genre4 : genres) {
-                genreRepository.add(genre4);
+                genreRepository.add(genre4, connection);
             }
 
             for (Book book : books) {
                 List <Genre> genreList = book.getGenres();
                 List <Integer> genresId = genreList.stream().map(Genre::getId).collect(Collectors.toList());
-                bookRepository.update(book, book.getAuthor().getId(), genresId);
+                bookRepository.update(book, book.getAuthor().getId(), genresId, connection);
             }
             for (Genre genre : genres) {
                 List <Book> bookList = genre.getBooks();
                 List <Integer> booksId = bookList.stream().map(Book::getId).collect(Collectors.toList());
-                genreRepository.update(genre, booksId);
+                genreRepository.update(genre, booksId, connection);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
